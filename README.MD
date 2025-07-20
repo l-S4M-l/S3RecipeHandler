@@ -23,5 +23,5 @@ Whether you're analyzing skater data or building your own skater profiles, this 
 ## 🧰 Installation
 
 ```bash
-pip install S3-Recipe-Handler
+pip install S3RecipeHandler
 ```

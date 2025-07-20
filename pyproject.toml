@@ -1,6 +1,6 @@
 [project]
 name = "S3RecipeHandler"
-version = "1.0.3"
+version = "1.0.4"
 authors = [
   { name="S4M" }
 ]
@@ -20,3 +20,4 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/l-S4M-l/S3RecipeHandler"
 "Bug Tracker" = "https://github.com/l-S4M-l/S3RecipeHandler/issues"
+Ko-fi = "https://ko-fi.com/chillsam2"

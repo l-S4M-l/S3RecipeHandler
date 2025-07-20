@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name="S3RecipeHandler",
-    version="1.0.3",
+    version="1.0.4",
     author="S4M",
     description="A Custom Skate 3 Recipe File Library",
     long_description=pathlib.Path("README.md").read_text(encoding="utf-8"),
@@ -11,6 +11,7 @@ setuptools.setup(
     url="https://github.com/l-S4M-l/S3RecipeHandler",
     project_urls={
         "Bug Tracker": "https://github.com/l-S4M-l/S3RecipeHandler/issues",
+        "Ko-fi": "https://ko-fi.com/chillsam2",
     },
     license="GPLv3",
     packages=["S3RecipeHandler"],
