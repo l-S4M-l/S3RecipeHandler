@@ -10,8 +10,8 @@ from .RGBBlock import RGBBlock
 from .GraphicBlock import GraphicBlock
 
 class Gender(Enum):
-    MALE = 0
-    FEMALE = 1
+    MALE = 1
+    FEMALE = 0
 
 class RecipeTypes(Enum):
     MARQUEE = 0
@@ -22,20 +22,25 @@ class RecipeTypes(Enum):
     TEST = 5
 
 class Recipe:
-    def __init__(self, recipe_bytes=None, recipe_name="", recipe_type=RecipeTypes.MARQUEE):
+    def __init__(self, recipe_bytes=None, Recipe_Json:dict=None, recipe_name="", recipe_type=RecipeTypes.MARQUEE):
+
         # Initialize properties
         self.recipe_name = ""
-        self.recipe_type = RecipeTypes.MARQUEE
-        self.asset_lists = []
-        self._only_load_model_textures = True
-        self._bytes_after = []
         self.gender = Gender.MALE
+        self.recipe_type = RecipeTypes.MARQUEE
+        self._only_load_model_textures = True
+        self.asset_lists = []
         self.rgb_blocks = []
         self.graphic_blocks = []
+        self._bytes_after = []
         
-        if recipe_bytes is not None:
+        if recipe_bytes != None:
             # Constructor with byte array parsing
             self._parse_recipe_bytes(recipe_bytes)
+        
+        elif Recipe_Json != None:
+            self.from_json(Recipe_Json)
+        
         else:
             # Constructor with name and type
             self.recipe_name = recipe_name
@@ -71,6 +76,7 @@ class Recipe:
                 self.asset_lists[-1].assets.append(Asset(recipe_bytes[start_index:start_index + 0x0C]))
                 amount_of_models = recipe_bytes[index - 1]
                 for k in range(amount_of_models):
+
                     self.asset_lists[-1].assets[-1].Models.append(Model(recipe_bytes[index:index + 0x25]))
                     index += 0x25
 
@@ -172,3 +178,64 @@ class Recipe:
 
         recipe_bytes.extend(self._bytes_after)
         return bytes(recipe_bytes)
+
+    def to_json(self):
+        asset_list = []
+        for asset in self.asset_lists:
+            asset_list.append(asset.to_json())
+
+
+        graphics_list = []
+        for graphic_block in self.graphic_blocks:
+            graphics_list.append(graphic_block.to_json())
+
+        rgb_blocks = []
+        for rgb_block in self.rgb_blocks:
+            rgb_blocks.append(rgb_block.to_json())
+    
+
+        data = {
+            "recipe_name":self.recipe_name,
+            "gender":self.gender.name.lower(),
+            "recipe_type":self.recipe_type.name.lower(),
+            "only_load_model_textures":self._only_load_model_textures,
+            "asset_list":asset_list,
+            "graphic_blocks":graphics_list,
+            "rgb_blocks":rgb_blocks,
+            "after_bytes":self._bytes_after
+        }
+
+        return data
+    
+    def from_json(self,json:dict):
+        self.recipe_name = json["recipe_name"]
+        
+        gender_map = {"female": Gender.FEMALE, "male": Gender.MALE}
+        self.gender = gender_map[json["gender"]]
+        
+        RecipeType_map = {"marquee":RecipeTypes.MARQUEE, "livingworld":RecipeTypes.LIVINGWORLD, "vehicle":RecipeTypes.VEHICLE, "createacharacter":RecipeTypes.CREATEACHARACTER, "undefined":RecipeTypes.UNDEFINED, "test":RecipeTypes.TEST}
+        self.recipe_type = RecipeType_map[json["recipe_type"]]
+
+        self._only_load_model_textures = (json["only_load_model_textures"] == "true")
+
+        self._bytes_after = json["after_bytes"]
+
+        self.asset_lists = []
+        for asset in json["asset_list"]:
+            al = AssetList()
+            al.from_json(json=asset)
+            self.asset_lists.append(al)
+
+        self.rgb_blocks = []
+
+        for rgb_blocks in json["rgb_blocks"]:
+            rgb = RGBBlock()
+            rgb.from_json(rgb_blocks)
+            self.rgb_blocks.append(rgb)
+        
+        self.graphic_blocks = []
+
+        for graphic_block in json["graphic_blocks"]:
+            g = GraphicBlock()
+            g.from_json(graphic_block)
+            self.graphic_blocks.append(g)

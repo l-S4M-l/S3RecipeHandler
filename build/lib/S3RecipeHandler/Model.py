@@ -2,6 +2,7 @@
 import struct
 from typing import List, Optional
 from .Helpers import Helpers
+from .texture import Texture
 
 class Model:
     def __init__(self, *args):
@@ -74,3 +75,30 @@ class Model:
             modelBlockBytes.extend(self.Textures[i].get_bytes())
         
         return bytes(modelBlockBytes)
+
+
+    def to_json(self) -> dict:
+        textures = []
+        for texture_class in self.Textures:
+            textures.append(texture_class.to_json())
+        
+        data = {
+            "ArenaID":self.ArenaID.hex(),
+            "ModelName":Helpers.file_name_bytes_to_string(self.ModelName),
+            "MaterialID":self.MaterialID.hex(),
+            "textures":textures
+        }
+        return data
+        
+    
+    def from_json(self,json):
+        self.ArenaID = bytearray.fromhex(json["ArenaID"])
+        self.ModelName = Helpers.file_name_to_bytes(json["ModelName"])
+        self.MaterialID = bytearray.fromhex(json["MaterialID"])
+
+        self.Textures = []
+        for Textures in json["textures"]:
+            t = Texture()
+            t.from_json(Textures)
+
+            self.Textures.append(t)

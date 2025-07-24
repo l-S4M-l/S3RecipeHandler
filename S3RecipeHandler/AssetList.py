@@ -1,12 +1,17 @@
 ﻿import struct
+from .Asset import Asset
 
 class AssetList:
-    def __init__(self, asset_header=None, asset_folder_name=None):
+    def __init__(self, asset_header=None, asset_json=None, asset_folder_name=None):
         self.asset_folder_name = ""
         self.assets = []
 
-        if asset_header is not None:
+        if asset_header != None:
             self.asset_folder_name = asset_header[4:4 + asset_header[3]].decode('ascii')
+        
+        if asset_json != None:
+            pass
+
         elif asset_folder_name is not None:
             self.asset_folder_name = asset_folder_name
 
@@ -23,3 +28,21 @@ class AssetList:
 
         return bytes(asset_header_bytes)
 
+    def to_json(self):
+        assets = []
+        for asset in self.assets:
+            assets.append(asset.to_json())
+        
+        data = {
+            "asset_folder_name":self.asset_folder_name,
+            "assets":assets
+        }
+        return data
+    
+    def from_json(self,json):
+        self.asset_folder_name = json["asset_folder_name"]
+        self.assets = []
+        for asset in json["assets"]:
+            a = Asset()
+            a.from_json(asset)
+            self.assets.append(a)

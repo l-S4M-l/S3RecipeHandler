@@ -1,10 +1,5 @@
 ﻿import struct
-
-class S3RGB:
-    def __init__(self):
-        self.r = 0.0
-        self.g = 0.0
-        self.b = 0.0
+from .S3RGB import S3RGB
 
 class Asset:
     def __init__(self):
@@ -16,7 +11,7 @@ class Model:
         self.MaterialID = bytearray(8)
 
 class RGBBlock:
-    def __init__(self, BlockBytes:bytes = None, RGB = None, Asset = None):
+    def __init__(self, BlockBytes:bytes = None, Block_json = None, RGB = None, Asset = None):
 
         if BlockBytes != None:
             self.RGB = S3RGB()
@@ -36,12 +31,16 @@ class RGBBlock:
             # Store ArenaID and Material ID that the RGB takes effect on
             self.AssetID = BlockBytes[0x1C:0x1C+8]
             self.MaterialID = BlockBytes[0x24:0x24+8]
+
+        elif Block_json != None:
+            pass
+        
         elif Asset != None:
             self.RGB = RGB
             self.AssetID = Asset.AssetID
             self.MaterialID = Asset.Models[0].MaterialID
         else:
-            print("failed to load, correct data was not parsed")
+            pass
 
     def get_bytes(self, index):
         RGBBlockBytes = bytearray()
@@ -58,3 +57,19 @@ class RGBBlock:
 
         return bytes(RGBBlockBytes)
 
+    def to_json(self):
+        r = float(self.RGB.r)
+        g = float(self.RGB.g)
+        b = float(self.RGB.b)
+
+        data = {   
+            "AssetID":self.AssetID.hex(),
+            "MaterialID":self.MaterialID.hex(),
+            "RGB":[r,g,b],
+        }
+        return data
+    
+    def from_json(self,json):
+        self.RGB = S3RGB(R = json["RGB"][0],G = json["RGB"][1],B = json["RGB"][2])
+        self.AssetID = bytearray.fromhex(json["AssetID"])
+        self.MaterialID = bytearray.fromhex(json["MaterialID"])

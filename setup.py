@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name="S3RecipeHandler",
-    version="1.0.4",
+    version="1.1.0",
     author="S4M",
     description="A Custom Skate 3 Recipe File Library",
     long_description=pathlib.Path("README.md").read_text(encoding="utf-8"),

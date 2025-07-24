@@ -1,6 +1,6 @@
 [project]
 name = "S3RecipeHandler"
-version = "1.0.4"
+version = "1.1.0"
 authors = [
   { name="S4M" }
 ]

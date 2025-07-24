@@ -1,11 +1,13 @@
 ﻿import struct
 
 class GraphicBlock:
-    def __init__(self, BlockBytes=None, URL=None, Asset=None):
-        if BlockBytes is not None:
+    def __init__(self, BlockBytes=None, Block_json=None, URL=None, Asset=None):
+        if BlockBytes is not None: 
             self.URL = BlockBytes[4:4 + BlockBytes[3]].decode('ascii')
             self.AssetID = BlockBytes[4 + len(self.URL):12 + len(self.URL)]
             self.MaterialID = BlockBytes[12 + len(self.URL):20 + len(self.URL)]
+        elif Block_json != None:
+            pass
         elif URL is not None and Asset is not None:
             self.URL = URL
             self.AssetID = Asset.AssetID
@@ -26,4 +28,17 @@ class GraphicBlock:
         GraphicBlockBytes.extend(bytearray(8))
         GraphicBlockBytes.append(1 if "http" in self.URL else 0)
         return bytes(GraphicBlockBytes)
+
+    def to_json(self):
+        data = {
+            "AssetID":self.AssetID.hex(),
+            "MaterialID":self.MaterialID.hex(),
+            "URL":self.URL
+        }
+        return data
+    
+    def from_json(self,json):
+        self.AssetID = bytearray.fromhex(json["AssetID"])
+        self.MaterialID = bytearray.fromhex(json["MaterialID"])
+        self.URL = json["URL"]
 
