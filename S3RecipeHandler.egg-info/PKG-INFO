@@ -1,8 +1,7 @@
 Metadata-Version: 2.4
 Name: S3RecipeHandler
-Version: 1.1.0
+Version: 1.2.0
 Summary: A Custom Skate 3 Recipe File Library
-Home-page: https://github.com/l-S4M-l/S3RecipeHandler
 Author: S4M
 License: GPLv3
 Project-URL: Homepage, https://github.com/l-S4M-l/S3RecipeHandler
@@ -17,9 +16,7 @@ Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Requires-Python: >=3.9
 Description-Content-Type: text/markdown
 License-File: LICENSE.txt
-Dynamic: home-page
 Dynamic: license-file
-Dynamic: requires-python
 
 # 🛹 Skate 3 Recipe File Library
 
