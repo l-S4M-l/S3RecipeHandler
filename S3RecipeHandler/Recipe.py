@@ -8,6 +8,8 @@ from .Model import Model
 from .texture import Texture
 from .RGBBlock import RGBBlock
 from .GraphicBlock import GraphicBlock
+from .BodyModBlock import body_mod_blocks
+from .graphic_vector_list import graphic_vector_list
 
 class Gender(Enum):
     MALE = 1
@@ -23,8 +25,14 @@ class RecipeTypes(Enum):
 
 class Recipe:
     def __init__(self, recipe_bytes=None, Recipe_Json:dict=None, recipe_name="", recipe_type=RecipeTypes.MARQUEE):
-
-        # Initialize properties
+        """
+        Serialized instance of a recipe class
+            recipe_bytes = bytes/bytearray of a recipe
+            Recipe_Json = dict of recipe
+            recipe_name = recipe name eg. cas_db
+            recipe_type = recipe type specifies what folder to read from
+        """
+        
         self.recipe_name = ""
         self.gender = Gender.MALE
         self.recipe_type = RecipeTypes.MARQUEE
@@ -32,7 +40,8 @@ class Recipe:
         self.asset_lists = []
         self.rgb_blocks = []
         self.graphic_blocks = []
-        self._bytes_after = []
+        self.body_mods = body_mod_blocks()
+        self.graphic_vectors = graphic_vector_list()
         
         if recipe_bytes != None:
             # Constructor with byte array parsing
@@ -120,8 +129,20 @@ class Recipe:
                 self.graphic_blocks.append(GraphicBlock(recipe_bytes[start_index:index]))
                 index += 1
 
-            # Just store the remaining bytes until i've fully figured out how recipes work
-            self._bytes_after.extend(recipe_bytes[index:index + 500])
+            start_index = index + 4
+            index = start_index + 76
+
+            print(start_index)
+            print(index)
+
+            self.body_mods = body_mod_blocks(asset_bytes=recipe_bytes[start_index:index])
+
+            start_index = index+20
+            index = start_index + 80
+
+            self.graphic_vectors = graphic_vector_list(vector_list_bytes=recipe_bytes[start_index:index])
+
+            #self._bytes_after.extend(recipe_bytes[index:index + 500])
 
     def remove_low_lod_models(self):
         """Remove low LOD models from assets"""
@@ -176,10 +197,22 @@ class Recipe:
             recipe_bytes.extend(self.graphic_blocks[i].get_bytes(i))
             recipe_bytes.append(i)
 
-        recipe_bytes.extend(self._bytes_after)
+        recipe_bytes.extend([0,0,0,0x13])
+        recipe_bytes.extend(self.body_mods.get_bytes())
+
+        recipe_bytes.extend([0] * 20)
+        recipe_bytes.extend(self.graphic_vectors.get_bytes())
+        recipe_bytes.extend([00, 00, 00, 00, 00, 0x0F, 0x58])
+
+        #recipe_bytes.extend(self._bytes_after)
+
         return bytes(recipe_bytes)
 
-    def to_json(self):
+    def to_json(self) -> dict:
+        """
+        converts serialized recipe to a dict format for easy serialized
+        """
+
         asset_list = []
         for asset in self.asset_lists:
             asset_list.append(asset.to_json())
@@ -202,12 +235,18 @@ class Recipe:
             "asset_list":asset_list,
             "graphic_blocks":graphics_list,
             "rgb_blocks":rgb_blocks,
-            "after_bytes":self._bytes_after
+            "body_mods":self.body_mods.to_json(),
+            "graphic_vectors":self.graphic_vectors.to_json()
         }
-
+        
         return data
     
     def from_json(self,json:dict):
+        """
+        loads a recipe from json format
+        json = dict pre serialized json
+        """
+
         self.recipe_name = json["recipe_name"]
         
         gender_map = {"female": Gender.FEMALE, "male": Gender.MALE}
@@ -218,24 +257,22 @@ class Recipe:
 
         self._only_load_model_textures = (json["only_load_model_textures"] == "true")
 
-        self._bytes_after = json["after_bytes"]
-
         self.asset_lists = []
         for asset in json["asset_list"]:
-            al = AssetList()
-            al.from_json(json=asset)
+            al = AssetList(asset_json=asset)
             self.asset_lists.append(al)
 
         self.rgb_blocks = []
 
         for rgb_blocks in json["rgb_blocks"]:
-            rgb = RGBBlock()
-            rgb.from_json(rgb_blocks)
+            rgb = RGBBlock(Block_json=rgb_blocks)
             self.rgb_blocks.append(rgb)
         
         self.graphic_blocks = []
 
         for graphic_block in json["graphic_blocks"]:
-            g = GraphicBlock()
-            g.from_json(graphic_block)
+            g = GraphicBlock(Block_json=graphic_block)
             self.graphic_blocks.append(g)
+
+        self.body_mods = body_mod_blocks(Asset_json=json["body_mods"])
+        self.graphic_vectors = graphic_vector_list(vector_list_json=json["graphic_vectors"])

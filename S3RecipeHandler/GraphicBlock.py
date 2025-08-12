@@ -7,7 +7,7 @@ class GraphicBlock:
             self.AssetID = BlockBytes[4 + len(self.URL):12 + len(self.URL)]
             self.MaterialID = BlockBytes[12 + len(self.URL):20 + len(self.URL)]
         elif Block_json != None:
-            pass
+            self.from_json(Block_json)
         elif URL is not None and Asset is not None:
             self.URL = URL
             self.AssetID = Asset.AssetID

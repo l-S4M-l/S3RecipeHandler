@@ -10,7 +10,7 @@ class AssetList:
             self.asset_folder_name = asset_header[4:4 + asset_header[3]].decode('ascii')
         
         if asset_json != None:
-            pass
+            self.from_json(asset_json)
 
         elif asset_folder_name is not None:
             self.asset_folder_name = asset_folder_name
